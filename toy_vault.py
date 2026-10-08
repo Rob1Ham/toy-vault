@@ -41,8 +41,8 @@ class ToyVaultLedger:
     def submit(self, actor_id: str, request: SpendRequest) -> dict:
         self._check_request(request)
         vault = self.vaults[request.vault_id]
-        if not actor_id:
-            raise ValueError("unknown actor")
+        if actor_id != vault["owner"] and actor_id not in vault["signers"]:
+            raise ValueError("only the owner or an approved signer may submit")
         if len(request.approvals) < 2 or any(name not in vault["signers"] for name in request.approvals):
             raise ValueError("two permitted approvals required")
         if vault["balance"] < request.amount_sats:
