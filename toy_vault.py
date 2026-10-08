@@ -45,8 +45,8 @@ class ToyVaultLedger:
             raise ValueError("unknown actor")
         if len(request.approvals) < 2 or any(name not in vault["signers"] for name in request.approvals):
             raise ValueError("two permitted approvals required")
-        if vault["balance"] < request.amount_sats:
-            raise ValueError("insufficient balance")
+        if vault["balance"] < request.amount_sats + request.fee_sats:
+            raise ValueError("insufficient balance for amount and fee")
 
         vault["balance"] -= request.amount_sats + request.fee_sats
         self.credits[request.destination] = self.credits.get(request.destination, 0) + request.amount_sats
