@@ -19,6 +19,7 @@ class ToyVaultLedger:
         self.credits: dict[str, int] = {}
         self.fees_sats = 0
         self.receipts: list[dict] = []
+        self.processed: dict[str, dict] = {}
 
     def add_vault(self, vault_id: str, owner: str, signers: set[str], balance_sats: int):
         if balance_sats < 0 or not owner or not vault_id or vault_id in self.vaults:
@@ -41,6 +42,8 @@ class ToyVaultLedger:
     def submit(self, actor_id: str, request: SpendRequest) -> dict:
         self._check_request(request)
         vault = self.vaults[request.vault_id]
+        if request.request_id in self.processed:
+            return self.processed[request.request_id]
         if not actor_id:
             raise ValueError("unknown actor")
         if len(request.approvals) < 2 or any(name not in vault["signers"] for name in request.approvals):
@@ -54,4 +57,5 @@ class ToyVaultLedger:
         receipt = {"request_id": request.request_id, "actor": actor_id,
                    "remaining_sats": vault["balance"]}
         self.receipts.append(receipt)
+        self.processed[request.request_id] = receipt
         return receipt
