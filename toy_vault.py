@@ -43,8 +43,8 @@ class ToyVaultLedger:
         vault = self.vaults[request.vault_id]
         if not actor_id:
             raise ValueError("unknown actor")
-        if len(request.approvals) < 2 or any(name not in vault["signers"] for name in request.approvals):
-            raise ValueError("two permitted approvals required")
+        if len(set(request.approvals)) < 2 or any(name not in vault["signers"] for name in request.approvals):
+            raise ValueError("two different permitted approvals required")
         if vault["balance"] < request.amount_sats:
             raise ValueError("insufficient balance")
 
